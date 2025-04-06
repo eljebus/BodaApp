@@ -1,88 +1,63 @@
-import express from 'express';
-import path from 'path';
-import userRoutes from './rutas';
-import webPush from 'web-push';
-import https from 'https';
-import fs from 'fs';
-import compression from 'compression'; // Add GZIP compression
-import rateLimit from 'express-rate-limit'; // Add rate limiting
-import helmet from 'helmet'; // Add security headers
+const express = require('express');
+const path = require('path');
+const userRoutes = require('./rutas');
+const bodyParser = require('body-parser');
+const webPush = require('web-push'); // Añadido para notificaciones push
+const https = require('https'); // Añadido para HTTPS
+const fs = require('fs'); // Añadido para certificados SSL
 
-// Use environment variables for sensitive data
-const port = process.env.PORT || 443; // Standard HTTPS port
+const port = 3000;
 const app = express();
 
-// Production security configurations
-app.set('trust proxy', 1); // Trust first proxy
-app.disable('x-powered-by'); // Hide Express
-app.use(helmet()); // Secure HTTP headers
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-
-// VAPID keys should come from environment variables
+// 1. Configuración VAPID para notificaciones push (AÑADIDO)
 const vapidKeys = {
-  publicKey: process.env.VAPID_PUBLIC_KEY,
-  privateKey: process.env.VAPID_PRIVATE_KEY
+  publicKey: 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo', // Reemplaza con tu clave
+  privateKey: 'SbrIGm6fNYR3jW_-khzghnkOc-pGEWPZvzdchPIgp_U' // Reemplaza con tu clave
 };
 
 webPush.setVapidDetails(
-  `mailto:${process.env.CONTACT_EMAIL}`,
+  'mailto:tu-email@example.com',
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
 
-// Middleware
-app.use(compression()); // GZIP compression
-app.use(limiter); // Rate limiting
-app.use(express.json({ limit: '10kb' })); // Body size limiting
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-app.use(express.static(path.join(__dirname, 'publicos'), {
-  maxAge: '1d' // Cache static assets
-}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// View engine
+// Configurar EJS como motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'vistas'));
 
-// Routes
+// Middleware para servir archivos estáticos
+app.use(express.static(path.join(__dirname, 'publicos')));
+
+// Configuración específica para PWA (MODIFICADO)
+app.get('/service-worker.js', (req, res) => {
+  res.setHeader('Service-Worker-Allowed', '/'); // Añadido para mejor compatibilidad
+  res.sendFile(path.join(__dirname, 'publicos/sw.js'));
+});
+
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json'); // Añadido header correcto
+  res.sendFile(path.join(__dirname, 'publicos/manifest.json'));
+});
+
+// Ruta para guardar suscripciones push (AÑADIDO)
+
+// Rutas existentes
 app.use('/', userRoutes);
 
-// General Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Internal Server Error');
+// Configuración SSL (AÑADIDO)
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.crt')),
+  ca: fs.readFileSync(path.join(__dirname, 'certificados', 'ca.crt')),
+  minVersion: 'TLSv1.2'
+};
+
+// Crear servidor HTTPS (MODIFICADO)
+https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en https://0.0.0.0:${port}`);
+  console.log('Clave pública VAPID para notificaciones:', vapidKeys.publicKey);
 });
 
-let server;
-try {
-  const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH),
-    ca: fs.readFileSync(process.env.SSL_CA_PATH)
-  };
-  server = https.createServer(sslOptions, app);
-} catch (error) {
-  console.error('Fatal: SSL configuration failed:', error);
-  process.exit(1); // Exit if SSL fails in production
-}
-
-// Start server
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Production server running on port ${port}`);
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  process.exit(1);
-});
