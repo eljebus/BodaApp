@@ -47,17 +47,9 @@ app.get('/manifest.json', (req, res) => {
 // Rutas existentes
 app.use('/', userRoutes);
 
-// Configuración SSL (AÑADIDO)
-const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.key')),
-  cert: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.crt')),
-  ca: fs.readFileSync(path.join(__dirname, 'certificados', 'ca.crt')),
-  minVersion: 'TLSv1.2'
-};
-
-// Crear servidor HTTPS (MODIFICADO)
-https.createServer(sslOptions, app).listen(port, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en https://0.0.0.0:${port}`);
+// Iniciar servidor HTTP
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://0.0.0.0:${port}`);
   console.log('Clave pública VAPID para notificaciones:', vapidKeys.publicKey);
 });
 
