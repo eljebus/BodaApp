@@ -3,7 +3,6 @@ const path = require('path');
 const userRoutes = require('./rutas');
 const bodyParser = require('body-parser');
 const webPush = require('web-push');
-const cors = require('cors');
 const compression = require('compression');
 
 const port = process.env.PORT || 3000;
@@ -23,7 +22,6 @@ webPush.setVapidDetails(
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());  // Habilitar CORS
 app.use(compression());  // Habilitar compresión de respuestas
 
 // Configurar EJS como motor de plantillas
