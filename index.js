@@ -3,7 +3,6 @@ const path = require('path');
 const userRoutes = require('./rutas');
 const bodyParser = require('body-parser');
 const webPush = require('web-push');
-const compression = require('compression');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -22,7 +21,6 @@ webPush.setVapidDetails(
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(compression());  // Habilitar compresión de respuestas
 
 // Configurar EJS como motor de plantillas
 app.set('view engine', 'ejs');
@@ -43,7 +41,7 @@ app.get('/manifest.json', (req, res) => {
 });
 
 // Ruta para guardar suscripciones push
-// (Aquí deberías agregar la ruta para manejar la suscripción a notificaciones)
+// Aquí deberías agregar la ruta para manejar la suscripción a notificaciones
 
 // Rutas existentes
 app.use('/', userRoutes);
