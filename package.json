@@ -2,7 +2,6 @@
   "name": "bodaapp",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",  // <-- Esta línea
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
