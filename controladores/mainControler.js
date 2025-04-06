@@ -198,28 +198,26 @@ exports.album = async (req, res) => {
         res.status(500).send('Error cargando el álbum');
     }
 };
-
-// Función para verificar si una suscripción existe en el servidor
 exports.checkSubscription = async (req, res) => {
     try {
-        if (!fs.existsSync(SUBS_FILE)) return res.json({ exists: false, message: 'No hay archivo de suscripciones' });
+        if (!fs.existsSync(SUBS_FILE)) {
+            return res.json({ exists: false, count: 0 });
+        }
 
         const fileContent = fs.readFileSync(SUBS_FILE, 'utf8');
         const subscriptions = JSON.parse(fileContent);
-
-        const hasValidSubscriptions = Array.isArray(subscriptions) && subscriptions.length > 0 &&
-            subscriptions.some(sub => sub && sub.endpoint && sub.keys && Object.keys(sub.keys).length > 0);
+        
+        const hasSubscriptions = Array.isArray(subscriptions) && subscriptions.length > 0;
 
         res.json({
-            exists: hasValidSubscriptions,
-            count: subscriptions.length,
-            message: hasValidSubscriptions ? `Hay ${subscriptions.length} suscripciones activas` : 'No hay suscripciones activas'
+            exists: hasSubscriptions,
+            count: subscriptions?.length || 0
         });
     } catch (error) {
-        console.error('Error al verificar suscripción:', error);
-        res.status(500).json({ error: 'Error al verificar suscripción', details: error.message });
+        res.status(500).json({ error: 'Error checking subscriptions' });
     }
 };
+
 
 exports.notificaciones = async (req, res) => {
     res.render('layout', { title: 'Enviar Notificaciones', content: 'notificaciones' });
