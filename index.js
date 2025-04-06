@@ -6,6 +6,7 @@ import https from 'https';
 import fs from 'fs';
 import compression from 'compression'; // Add GZIP compression
 import rateLimit from 'express-rate-limit'; // Add rate limiting
+import helmet from 'helmet'; // Add security headers
 
 // Use environment variables for sensitive data
 const port = process.env.PORT || 443; // Standard HTTPS port
@@ -14,6 +15,7 @@ const app = express();
 // Production security configurations
 app.set('trust proxy', 1); // Trust first proxy
 app.disable('x-powered-by'); // Hide Express
+app.use(helmet()); // Secure HTTP headers
 
 // Rate limiting
 const limiter = rateLimit({
@@ -49,13 +51,12 @@ app.set('views', path.join(__dirname, 'vistas'));
 // Routes
 app.use('/', userRoutes);
 
-// Error handling
+// General Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-app.use((err, _req, res, _next) => {
   console.error(err.stack);
   res.status(500).send('Internal Server Error');
 });
+
 let server;
 try {
   const sslOptions = {
@@ -80,6 +81,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
+// Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
   process.exit(1);
