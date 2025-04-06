@@ -77,8 +77,12 @@ const getNetworkIp = () => {
   return 'localhost';
 };
 
+
+
 const networkIp = '0.0.0.0'; // Listen on all available network interfaces
 server.listen(port, networkIp, () => {
   console.log(`Servidor corriendo en el puerto ${port}`);
   console.log(`IP local: ${getNetworkIp()}`);
+
+  console.log("test");
 });
