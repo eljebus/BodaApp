@@ -1,14 +1,11 @@
-const express = require('express');
-const path = require('path');
-const userRoutes = require('./rutas');
-const webPush = require('web-push');
-const https = require('https');
-const fs = require('fs');
-const schedule = require('node-schedule');
-const os = require('os');
-const helmet = require('helmet'); // Add security headers
-const compression = require('compression'); // Add GZIP compression
-const rateLimit = require('express-rate-limit'); // Add rate limiting
+import express from 'express';
+import path from 'path';
+import userRoutes from './rutas';
+import webPush from 'web-push';
+import https from 'https';
+import fs from 'fs';
+import compression from 'compression'; // Add GZIP compression
+import rateLimit from 'express-rate-limit'; // Add rate limiting
 
 // Use environment variables for sensitive data
 const port = process.env.PORT || 443; // Standard HTTPS port
@@ -37,7 +34,6 @@ webPush.setVapidDetails(
 );
 
 // Middleware
-app.use(helmet()); // Security headers
 app.use(compression()); // GZIP compression
 app.use(limiter); // Rate limiting
 app.use(express.json({ limit: '10kb' })); // Body size limiting
@@ -56,10 +52,10 @@ app.use('/', userRoutes);
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
+app.use((err, _req, res, _next) => {
+  console.error(err.stack);
   res.status(500).send('Internal Server Error');
 });
-
-// SSL configuration
 let server;
 try {
   const sslOptions = {
