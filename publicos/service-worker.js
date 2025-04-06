@@ -5,8 +5,6 @@ const VERSION = '1.0.0';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/css/materialize.css',
-    '/css/style.css',
     '/js/materialize.js',
     '/js/fecha.js',
     '/js/instalar.js',
@@ -19,7 +17,6 @@ const urlsToCache = [
 // Forzar activación inmediata del service worker
 self.addEventListener('install', event => {
     console.log('[Service Worker] Instalando versión:', VERSION);
-    // Forzar activación inmediata
     self.skipWaiting();
     
     event.waitUntil(
@@ -27,6 +24,9 @@ self.addEventListener('install', event => {
             .then(cache => {
                 console.log('[Service Worker] Cacheando recursos iniciales');
                 return cache.addAll(urlsToCache);
+            })
+            .catch(error => {
+                console.error('[Service Worker] Error al cachear:', error);
             })
     );
 });
@@ -47,6 +47,8 @@ self.addEventListener('activate', event => {
         }).then(() => {
             // Asegurar que el service worker tome control inmediatamente
             return self.clients.claim();
+        }).catch(error => {
+            console.error('[Service Worker] Error al activar:', error);
         })
     );
 });
@@ -74,6 +76,9 @@ self.addEventListener('fetch', event => {
                         .then(cache => {
                             console.log('[Service Worker] Actualizando caché:', event.request.url);
                             cache.put(event.request, responseToCache);
+                        })
+                        .catch(error => {
+                            console.error('[Service Worker] Error al actualizar el caché:', error);
                         });
                 }
                 return response;
@@ -99,42 +104,58 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Manejar notificaciones push
-self.addEventListener('push', event => {
-    console.log('[Service Worker] Push recibido');
-    
-    const options = {
-        body: event.data.text(),
-        icon: '/img/icon-192x192.png',
-        badge: '/img/luna.png',
-        vibrate: [100, 50, 100],
-        data: {
-            dateOfArrival: Date.now(),
-            primaryKey: 1
-        },
-        actions: [
-            {
-                action: 'explore',
-                title: 'Ver más',
-                icon: '/img/luna.png'
-            }
-        ]
-    };
+// Manejo de notificaciones push
+self.addEventListener('push', function(event) {
+    console.log('Evento push recibido:', event);
 
-    event.waitUntil(
-        self.registration.showNotification('Boda Fátima y Jesús', options)
-    );
+    if (event.data) {
+        try {
+            const data = event.data.json();
+            console.log('Datos de la notificación:', data);
+
+            if (!data.title || !data.body) {
+                throw new Error('Faltan datos necesarios para la notificación');
+            }
+
+            const options = {
+                body: data.body,
+                icon: data.icon || '/img/icon-192x192.png',
+                badge: data.badge || '/img/luna.png',
+                vibrate: [100, 50, 100],
+                data: {
+                    dateOfArrival: Date.now(),
+                    primaryKey: 1
+                },
+                actions: [
+                    {
+                        action: 'explore',
+                        title: 'Ver más'
+                    }
+                ]
+            };
+
+            event.waitUntil(
+                self.registration.showNotification(data.title, options)
+            );
+        } catch (error) {
+            console.error('Error en la notificación push:', error);
+        }
+    }
 });
 
-// Manejar clics en notificaciones
-self.addEventListener('notificationclick', event => {
-    console.log('[Service Worker] Notificación clickeada');
+// Manejo de clics en las notificaciones
+self.addEventListener('notificationclick', function(event) {
+    console.log('Notificación clickeada:', event);
     
     event.notification.close();
 
     if (event.action === 'explore') {
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow('/explore') // Redirigir a una página específica si se clickea "explore"
+        );
+    } else {
+        event.waitUntil(
+            clients.openWindow('/') // Redirigir a la página principal en caso contrario
         );
     }
 });

@@ -22,60 +22,25 @@ webPush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-// 2. Inicialización de archivos
-const suscripcionesPath = path.join(__dirname, 'publicos', 'suscripciones.json');
-if (!fs.existsSync(suscripcionesPath)) {
-    fs.writeFileSync(suscripcionesPath, '[]');
-    console.log('Archivo de suscripciones creado');
-}
-
-// 3. Configuración básica de Express
+// 2. Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'publicos')));
+
+// 3. Configuración de vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'vistas'));
 
-// 4. Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, 'publicos'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', `image/${path.split('.').pop()}`);
-    } else if (path.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    }
-  }
-}));
-
-// 5. Rutas específicas para PWA
-app.get('/service-worker.js', (req, res) => {
-  try {
-    res.setHeader('Service-Worker-Allowed', '/');
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'publicos/service-worker.js'));
-  } catch (error) {
-    console.error('Error al servir el service worker:', error);
-    res.status(500).send('Error interno del servidor');
-  }
-});
-
-app.get('/manifest.json', (req, res) => {
-  try {
-    res.setHeader('Content-Type', 'application/manifest+json');
-    res.sendFile(path.join(__dirname, 'publicos/manifest.json'));
-  } catch (error) {
-    console.error('Error al servir el manifest:', error);
-    res.status(500).send('Error interno del servidor');
-  }
-});
-
-// 6. Rutas de la aplicación
+// 4. Registrar rutas
 app.use('/', userRoutes);
 
-// 7. Configuración SSL
+// 5. Manejo de errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Algo salió mal!');
+});
+
+// 6. Configuración SSL
 let server;
 try {
   const keyPath = path.join(__dirname, 'certificados', 'cert.key');
@@ -99,84 +64,8 @@ try {
   server = require('http').createServer(app);
 }
 
-// 8. Programar notificaciones
-const notificacionesPath = path.join(__dirname, 'publicos', 'notificaciones_programadas.json');
-if (fs.existsSync(notificacionesPath)) {
-  try {
-    const notificaciones = JSON.parse(fs.readFileSync(notificacionesPath, 'utf-8'));
-    
-    notificaciones.forEach(notificacion => {
-      const fechaNotificacion = new Date(notificacion.scheduledDateTime);
-      
-      // Verificar que la fecha no está en el pasado
-      if (fechaNotificacion > new Date()) {
-        console.log(`Programando notificación "${notificacion.title}" para:`, fechaNotificacion.toLocaleString());
-        
-        const job = schedule.scheduleJob(fechaNotificacion, async function() {
-          try {
-            console.log(`Enviando notificación programada: ${notificacion.title}`);
-            
-            // Leer suscripciones
-            if (!fs.existsSync(suscripcionesPath)) {
-              console.log('No hay suscripciones para enviar notificación');
-              return;
-            }
-
-            const subscriptions = JSON.parse(await fs.promises.readFile(suscripcionesPath, 'utf-8'));
-            if (subscriptions.length === 0) {
-              console.log('No hay suscripciones para enviar notificación');
-              return;
-            }
-            
-            // Preparar el payload
-            const payload = JSON.stringify({
-              title: notificacion.title,
-              body: notificacion.body,
-              icon: notificacion.image || '/img/icon-192x192.png',
-              badge: notificacion.image || '/img/icon-192x192.png',
-              vibrate: [100, 50, 100],
-              data: {
-                dateOfArrival: Date.now(),
-                primaryKey: notificacion.id || 1
-              },
-              actions: [{
-                action: 'explore',
-                title: 'Ver más'
-              }]
-            });
-
-            // Enviar notificación a cada suscriptor
-            for (const subscription of subscriptions) {
-              try {
-                await webPush.sendNotification(subscription, payload);
-                console.log('Notificación enviada a:', subscription.endpoint);
-              } catch (error) {
-                console.error('Error al enviar notificación:', error);
-              }
-            }
-          } catch (error) {
-            console.error('Error al enviar notificación programada:', error);
-          }
-        });
-      } else {
-        console.log(`Notificación "${notificacion.title}" no programada: la fecha está en el pasado`);
-      }
-    });
-  } catch (error) {
-    console.error('Error al leer notificaciones programadas:', error);
-  }
-}
-
-// 9. Iniciar servidor
-// Iniciar servidor
-
-
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:${port}`);
-});
-
-// 9. Iniciar servidor (VERSIÓN MODIFICADA PARA RED LOCAL)
-/*const getNetworkIp = () => {
+// 7. Iniciar servidor
+const getNetworkIp = () => {
   const interfaces = os.networkInterfaces();
   for (const name in interfaces) {
     for (const iface of interfaces[name]) {
@@ -188,16 +77,7 @@ app.listen(port, () => {
   return 'localhost';
 };
 
-const localIp = getNetworkIp();
-const protocol = server.cert ? 'https' : 'http';
-
-server.listen(port, '0.0.0.0', () => {
-  console.log('\n=== Servidor iniciado correctamente ===');
-  console.log(`- Acceso local: ${protocol}://localhost:${port}`);
-  console.log(`- Acceso red local: ${protocol}://${localIp}:${port}`);
-  if (server.cert) {
-    console.log('\n⚠️ Si usas HTTPS con certificado auto-firmado:');
-    console.log('En Chrome/Edge visita: chrome://flags/#allow-insecure-localhost');
-    console.log('y habilita la opción "Allow invalid certificates for resources loaded from localhost"');
-  }
-});*/
+const networkIp = getNetworkIp();
+server.listen(port, networkIp, () => {
+  console.log(`Servidor corriendo en https://${networkIp}:${port}`);
+});

@@ -8,12 +8,18 @@
     </h1>
 
 
+    <aside id="cargando">
+
+        CARGANDO FOTO...
+    </aside>
+
     <div class="pinterest-masonry">
 
       <% if (fotos && fotos.length > 0) { %>
         <% fotos.forEach(foto => { %>
           <div class="masonry-item modal-trigger" data-target="photo-modal">
             <img src="<%= foto %>" alt="Imagen del álbum">
+            
            
           </div>
         <% }); %>
@@ -33,7 +39,7 @@
 
 
 
-    <div class="fixed-action-btn">
+    <div class="fixed-action-btn" id="mainControl">
       <a class="btn-floating btn-large red waves-effect waves-light btn z-depth-2">
         <i class="large material-icons" id="menu">add_a_photo</i>
       </a>
@@ -55,7 +61,6 @@
 
 
          <div class="controles">
-                <i class="material-icons z-depth-2" id="compartir" style="font-size: 24px;">share</i>
               <i class="material-icons z-depth-2" id="descargar" style="font-size: 24px; ">file_download</i>
          </div>
        

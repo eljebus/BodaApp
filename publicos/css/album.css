@@ -4,8 +4,36 @@
     padding-top:1em;
     padding-bottom: 0.3em;
 }
+#photo-modal {
+    top: 0.5% !important;
+}
+
+#cargando{
+  font-size: 1.5em;
+  padding: 1em;
+  text-align: center;
+  animation: bounce 1s infinite;
+  display: none;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.5;
+  }
+}
+
 #modal-image{
   width: 100%;
+}
+#photo-modal .modal-content{
+  max-height: 100vh;
+  overflow: hidden;
+  border-solid:2px white;
 }
 #album{
   position: relative;

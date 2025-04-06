@@ -24,43 +24,135 @@
             </div>
         </form>
     </div>
+    <div id="subscriptionStatus" class="row" style="display: none;">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <p id="statusMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('notificationForm');
-    
+    const subscriptionStatus = document.getElementById('subscriptionStatus');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // Verificar que estemos en HTTPS
+    if (window.location.protocol !== 'https:') {
+        M.toast({html: 'Las notificaciones requieren una conexión segura (HTTPS)'}); 
+        form.style.opacity = '0.5'; // Deshabilitar el formulario si no es HTTPS
+        form.style.pointerEvents = 'none'; // Prevenir interacción
+        return;
+    }
+
+    // Verificar si hay suscripciones
+    async function checkSubscriptions() {
+        try {
+            const response = await fetch('/check-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            /**
+             * Checks and adjusts for notifications
+             * 
+             * This function appears to verify and handle notification settings/configurations.
+             * However, more context about the specific implementation and purpose would be needed
+             * for more detailed documentation.
+             * 
+             * @returns {void}
+             */
+            const data = await response.json();
+            updateSubscriptionStatus(data);
+        } catch (error) {
+            console.error('Error al verificar suscripciones:', error);
+            M.toast({html: `Error al verificar suscripciones: ${error.message}`});
+            showErrorMessage('Error al verificar suscripciones', error.message);
+        }
+    }
+
+    function updateSubscriptionStatus(data) {
+    subscriptionStatus.style.display = 'block';
+    const { exists, message, details } = data;
+
+    // Verificar si details existe antes de usarlo
+    const fileExists = details?.fileExists ? 'Sí' : 'No';
+    const subscriptionsCount = details?.subscriptionsCount || 0;
+    const hasValidSubscriptions = details?.hasValidSubscriptions ? 'Sí' : 'No';
+
+    const statusClass = exists ? 'green lighten-4' : 'red lighten-4';
+    const icon = exists ? 'check_circle' : 'warning';
+
+    subscriptionStatus.innerHTML = `
+        <div class="card-panel ${statusClass}">
+            <i class="material-icons left">${icon}</i>
+            ${message}
+            <div class="details" style="font-size: 0.8em; margin-top: 5px;">
+                <strong>Detalles:</strong><br>
+                - Archivo existe: ${fileExists}<br>
+                - Suscripciones: ${subscriptionsCount}<br>
+                - Válidas: ${hasValidSubscriptions}
+            </div>
+        </div>
+    `;
+}
+
+    // Verificar suscripciones al cargar la página y cada 5 segundos
+    checkSubscriptions();
+    setInterval(checkSubscriptions, 5000);
+
+    // Manejo del envío del formulario
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const title = document.getElementById('title').value;
-        const body = document.getElementById('body').value;
-        
+
+        const title = document.getElementById('title').value.trim();
+        const body = document.getElementById('body').value.trim();
+
+        // Validación adicional
+        if (!title || !body) {
+            M.toast({html: 'Por favor complete todos los campos'});
+            return;
+        }
+
         try {
+            // Verificar suscripciones antes de enviar
+            const checkResponse = await fetch('/check-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const checkData = await checkResponse.json();
+            if (!checkData.exists) {
+                throw new Error('No hay usuarios suscritos para enviar notificaciones');
+            }
+
+            // Enviar la notificación
             const response = await fetch('/send-notification', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: title,
-                    body: body,
-                    image: '/img/icon-192x192.png'
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, body })
             });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                M.toast({html: 'Notificación enviada exitosamente'});
-                form.reset();
-            } else {
-                M.toast({html: 'Error al enviar notificación: ' + result.error});
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al enviar notificación');
             }
+
+            const data = await response.json();
+            M.toast({html: `Notificación enviada exitosamente a ${data.successful} usuarios`});
+            form.reset();
+
+            // Actualizar estado de suscripciones
+            checkSubscriptions();
         } catch (error) {
             console.error('Error:', error);
-            M.toast({html: 'Error al enviar notificación'});
+            M.toast({html: error.message || 'Error al enviar notificación'});
         }
     });
 });
-</script> 
+</script>

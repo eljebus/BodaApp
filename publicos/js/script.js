@@ -12,7 +12,6 @@ class PhotoHandler {
 
 
 
-
             this.setupButtons();
 
             var elems = document.querySelectorAll('.fixed-action-btn');
@@ -38,14 +37,14 @@ class PhotoHandler {
     }
 
 
-    
     setPhotoView(e) {
         const clickedElement = e.currentTarget;
         const imgElement = clickedElement.querySelector('img');
         if (imgElement) {
             const imgSrc = imgElement.src;
             console.log('Image source:', imgSrc);
-           document.getElementById("modal-image").src = imgSrc;
+            document.getElementById("modal-image").src = imgSrc;
+            document.getElementById("photo-modal").style.top = "0%";
         }
     }
 
@@ -186,37 +185,52 @@ class PhotoHandler {
       async uploadPhoto() {
         if (!this.selectedPhoto) return;
       
-        // Mostrar mensaje de cargando
-        const loadingMessage = document.createElement('div');
-        loadingMessage.id = 'loading-message';
-        loadingMessage.textContent = 'Comprimiendo y subiendo foto...';
-        document.body.appendChild(loadingMessage);
+        // Mostrar elemento de carga y deshabilitar menú
+        const loadingElement = document.getElementById('cargando');
+        const menuButton = document.getElementById('mainControl');
+        
+        if (loadingElement) {
+          loadingElement.style.display = 'block';
+          // Scroll al inicio cuando se muestra el elemento de carga
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+        if (menuButton) menuButton.style.display = 'none';
       
         try {
-          // Comprimir imagen antes de subir (solo para imágenes)
-          const processedFile = this.selectedPhoto.type.startsWith('image/') 
+          const processedFile = this.selectedPhoto.type.startsWith('image/')
             ? await this.compressImage(this.selectedPhoto)
             : this.selectedPhoto;
       
           const formData = new FormData();
           formData.append('photo', processedFile);
       
-          const response = await fetch('/subir-foto', {
+          const uploadURL = `/subir-foto?timestamp=${Date.now()}`;
+          const response = await fetch(uploadURL, {
             method: 'POST',
             body: formData,
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
           });
       
-         
-          console.log('Foto subida con éxito:');
-          console.log(response);
-          location.reload();
-          
+          if (!response.ok) throw new Error('Error al subir la foto');
+      
+          const json = await response.json();
+          const nuevaFotoURL = json.url;
+      
+          // Redirige al álbum con la nueva imagen en la query
+          window.location.href = `/album?nueva=${encodeURIComponent(nuevaFotoURL)}`;
+      
         } catch (error) {
           console.error('Error:', error);
-          alert(error.message);
+          alert('Error al subir la foto: ' + error.message);
         } finally {
-          const loadingMessage = document.getElementById('loading-message');
-          if (loadingMessage) loadingMessage.remove();
+          // Ocultar elemento de carga y rehabilitar menú
+          if (loadingElement) loadingElement.style.display = 'none';
+          if (menuButton) menuButton.style.pointerEvents = 'auto';
         }
       }
 }

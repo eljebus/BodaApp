@@ -6,13 +6,5 @@
       "auth": "uzUUIsm1PMjGqPO64PdN7g",
       "p256dh": "BFItPOgUSAU-24nfvWoqzuPmxuZ6SA_UgDg1NRJBKZ5kDJotZ9hoYaGnU9gzOws8rGfKSnrzXcavAL3LPct7se4"
     }
-  },
-  {
-    "endpoint": "https://updates.push.services.mozilla.com/wpush/v2/gAAAAABn8bDPCAtXx7V6sWHB-zSGHiBXXGPcJveJ0HsavsEV5L4nMIU4jOcjAxaP-rvEGws4apqP-gczKwTYcmgCB89Uy_YR7J3q8nufaOEn_Yv0dNqNEp2Enp-2F_HMOWd1H6xChZ5_sUew_C9xrruFCjJsZ-BPrddIw8pTBnYf1zqcmOfKet8",
-    "expirationTime": null,
-    "keys": {
-      "auth": "VjKykdMZz2LHzZBCL877Zg",
-      "p256dh": "BG4-xviFkB4DTO_kSTPDPS1D28EiECOpNXt8NTkrLzTNymWApksXY27DFTBmPO1tbYsnIvY4KqokkzylW-WvclM"
-    }
   }
 ]

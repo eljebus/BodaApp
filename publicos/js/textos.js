@@ -24,6 +24,8 @@ class Textos {
 
     saveText(){
 
+        $("#compartirTexto").prop("disabled", true);
+        $("#compartirTexto").html("Guardando...");
         const nombre = $("#nombre").val();
         const deseo = $("#deseo").val();
         const url = "/guardar-texto"; // URL del controlador para guardar el texto
