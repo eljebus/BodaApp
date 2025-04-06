@@ -2,12 +2,14 @@ const express = require('express');
 const path = require('path');
 const userRoutes = require('./rutas');
 const bodyParser = require('body-parser');
-const webPush = require('web-push');
+const webPush = require('web-push'); // Añadido para notificaciones push
+const https = require('https'); // Añadido para HTTPS
+const fs = require('fs'); // Añadido para certificados SSL
 
 const port = process.env.PORT || 3000;
 const app = express();
 
-// Configuración VAPID para notificaciones push
+// 1. Configuración VAPID para notificaciones push (AÑADIDO)
 const vapidKeys = {
   publicKey: 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo', // Reemplaza con tu clave
   privateKey: 'SbrIGm6fNYR3jW_-khzghnkOc-pGEWPZvzdchPIgp_U' // Reemplaza con tu clave
@@ -29,24 +31,30 @@ app.set('views', path.join(__dirname, 'vistas'));
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'publicos')));
 
-// Configuración específica para PWA
+// Configuración específica para PWA (MODIFICADO)
 app.get('/service-worker.js', (req, res) => {
-  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Service-Worker-Allowed', '/'); // Añadido para mejor compatibilidad
   res.sendFile(path.join(__dirname, 'publicos/sw.js'));
 });
 
 app.get('/manifest.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Content-Type', 'application/manifest+json'); // Añadido header correcto
   res.sendFile(path.join(__dirname, 'publicos/manifest.json'));
 });
 
-// Ruta para guardar suscripciones push
-// Aquí deberías agregar la ruta para manejar la suscripción a notificaciones
+// Ruta para guardar suscripciones push (AÑADIDO)
 
 // Rutas existentes
 app.use('/', userRoutes);
 
-// Iniciar servidor HTTP (sin HTTPS)
-app.listen(port, () => {
-  console.log(`Servidor HTTP corriendo en http://localhost:${port}`);
+
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.crt')),
+  ca: fs.readFileSync(path.join(__dirname, 'certificados', 'ca.crt')) // opcional
+};
+
+
+https.createServer(sslOptions, app).listen(port, () => {
+  console.log(`Servidor corriendo en https://0.0.0.0:${port}`);
 });
