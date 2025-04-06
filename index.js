@@ -1,88 +1,90 @@
 const express = require('express');
 const path = require('path');
 const userRoutes = require('./rutas');
-const webPush = require('web-push'); // Para notificaciones push
-const https = require('https'); // Para HTTPS
-const fs = require('fs'); // Para certificados SSL
-const schedule = require('node-schedule'); // Para programar tareas
-const os = require('os'); // Añadido para detectar IP local
+const webPush = require('web-push');
+const https = require('https');
+const fs = require('fs');
+const schedule = require('node-schedule');
+const os = require('os');
+const helmet = require('helmet'); // Add security headers
+const compression = require('compression'); // Add GZIP compression
+const rateLimit = require('express-rate-limit'); // Add rate limiting
 
-const port = process.env.PORT || 3000;
+// Use environment variables for sensitive data
+const port = process.env.PORT || 443; // Standard HTTPS port
 const app = express();
 
-// 1. Configuración VAPID para notificaciones push
+// Production security configurations
+app.set('trust proxy', 1); // Trust first proxy
+app.disable('x-powered-by'); // Hide Express
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+// VAPID keys should come from environment variables
 const vapidKeys = {
-  publicKey: 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo',
-  privateKey: 'SbrIGm6fNYR3jW_-khzghnkOc-pGEWPZvzdchPIgp_U'
+  publicKey: process.env.VAPID_PUBLIC_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY
 };
 
 webPush.setVapidDetails(
-  'mailto:tu-email@example.com',
+  `mailto:${process.env.CONTACT_EMAIL}`,
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
 
-// 2. Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'publicos')));
+// Middleware
+app.use(helmet()); // Security headers
+app.use(compression()); // GZIP compression
+app.use(limiter); // Rate limiting
+app.use(express.json({ limit: '10kb' })); // Body size limiting
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.static(path.join(__dirname, 'publicos'), {
+  maxAge: '1d' // Cache static assets
+}));
 
-// 3. Configuración de vistas
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'vistas'));
 
-// 4. Registrar rutas
+// Routes
 app.use('/', userRoutes);
 
-// 5. Manejo de errores
+// Error handling
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Algo salió mal!');
+  console.error(err.stack);
+  res.status(500).send('Internal Server Error');
 });
 
-// 6. Configuración SSL
+// SSL configuration
 let server;
 try {
-  const keyPath = path.join(__dirname, 'certificados', 'cert.key');
-  const certPath = path.join(__dirname, 'certificados', 'cert.crt');
-  const caPath = path.join(__dirname, 'certificados', 'ca.crt');
-
-  if (fs.existsSync(keyPath) && fs.existsSync(certPath) && fs.existsSync(caPath)) {
-    const sslOptions = {
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-      ca: fs.readFileSync(caPath)
-    };
-    server = https.createServer(sslOptions, app);
-    console.log('Servidor HTTPS creado');
-  } else {
-    console.log('Certificados no encontrados, usando HTTP');
-    server = require('http').createServer(app);
-  }
+  const sslOptions = {
+    key: fs.readFileSync(process.env.SSL_KEY_PATH),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+    ca: fs.readFileSync(process.env.SSL_CA_PATH)
+  };
+  server = https.createServer(sslOptions, app);
 } catch (error) {
-  console.error('Error al configurar SSL:', error);
-  server = require('http').createServer(app);
+  console.error('Fatal: SSL configuration failed:', error);
+  process.exit(1); // Exit if SSL fails in production
 }
 
-// 7. Iniciar servidor
-const getNetworkIp = () => {
-  const interfaces = os.networkInterfaces();
-  for (const name in interfaces) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return 'localhost';
-};
+// Start server
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Production server running on port ${port}`);
+});
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
 
-
-const networkIp = '0.0.0.0'; // Listen on all available network interfaces
-server.listen(port, networkIp, () => {
-  console.log(`Servidor corriendo en el puerto ${port}`);
-  console.log(`IP local: ${getNetworkIp()}`);
-
-  console.log("test");
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
 });
