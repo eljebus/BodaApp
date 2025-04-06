@@ -6,23 +6,23 @@
     <meta name="screen-orientation" content="portrait">
     <link rel="icon" href="/img/luna.png">
     <title>Fatima & Jesús</title>
-    
+
     <!-- Manifiesto para PWA -->
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
-    
+
     <!-- Iconos para la aplicación -->
     <link rel="icon" href="/img/icon-192x192.png" sizes="192x192">
     <link rel="apple-touch-icon" href="/img/icon-192x192.png">
-    
+
     <!-- Meta para PWA -->
     <meta name="theme-color" content="#3967AF">
     <meta name="description" content="Aplicación para la boda de Fátima y Jesús">
-    
+
     <!-- Habilitar modo web app en iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Boda FyJ">
-    
+
     <!-- CSS -->
     <link href="/css/materialize.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
@@ -38,7 +38,7 @@
             <img src="/img/girar.png" alt="">
         </center>
     </div>
-    
+
     <main>
         <%- include(content) %>
     </main>
@@ -56,35 +56,29 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar modales
+        document.addEventListener('DOMContentLoaded', function () {
             const pushNotificationModal = M.Modal.init(document.getElementById('pushNotificationModal'), {
                 dismissible: false
             });
-    
-            // Verificar permisos de notificación
+
             async function checkNotificationPermission() {
                 try {
-                    // Verificar si el navegador soporta notificaciones
                     if (!('Notification' in window)) {
                         console.log('Este navegador no soporta notificaciones push');
                         return;
                     }
-    
-                    // Verificar si ya se ha denegado el permiso
+
                     if (Notification.permission === 'denied') {
                         console.log('Los permisos de notificación han sido denegados');
                         return;
                     }
-    
-                    // Verificar si ya se ha aceptado el permiso
+
                     if (Notification.permission === 'granted') {
                         console.log('Los permisos de notificación ya han sido concedidos');
                         await subscribeToPushNotifications();
                         return;
                     }
-    
-                    // Si no se ha pedido permiso antes, mostrar el modal
+
                     if (!localStorage.getItem('pushNotificationDeclined')) {
                         pushNotificationModal.open();
                     }
@@ -92,9 +86,8 @@
                     console.error('Error al verificar permisos:', error);
                 }
             }
-    
-            // Manejar la aceptación de notificaciones
-            document.getElementById('acceptNotifications').addEventListener('click', async function() {
+
+            document.getElementById('acceptNotifications').addEventListener('click', async function () {
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
@@ -106,84 +99,87 @@
                     console.error('Error al solicitar permiso:', error);
                 }
             });
-    
-            // Manejar el rechazo de notificaciones
-            document.getElementById('declineNotifications').addEventListener('click', function() {
+
+            document.getElementById('declineNotifications').addEventListener('click', function () {
                 localStorage.setItem('pushNotificationDeclined', 'true');
             });
-    
-            // Función para suscribirse a notificaciones push
+
             async function subscribeToPushNotifications() {
                 try {
-                    // Registrar el service worker
                     const registration = await navigator.serviceWorker.register('/service-worker.js');
                     console.log('Service Worker registrado:', registration);
-    
-                    // Verificar si ya existe una suscripción
+
                     const existingSubscription = await registration.pushManager.getSubscription();
                     if (existingSubscription) {
                         console.log('Ya existe una suscripción:', existingSubscription);
-                        // Enviar la suscripción existente al servidor para verificar
+
+                        const existingJSON = existingSubscription.toJSON();
+                        if (!existingJSON || !existingJSON.endpoint) {
+                            throw new Error("Suscripción existente inválida.");
+                        }
+
                         const response = await fetch('/save-subscription', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify(existingSubscription)
+                            body: JSON.stringify(existingJSON)
                         });
-    
+
                         const result = await response.json();
                         console.log('Respuesta del servidor:', result);
-    
+
                         if (result.message === 'Suscripción ya existe') {
-                            M.toast({html: 'Ya estás suscrito a las notificaciones'});
+                          console.log('Ya estás suscrito a las notificaciones');
                         } else {
-                            M.toast({html: '¡Notificaciones activadas!'});
+                            M.toast({ html: '¡Notificaciones activadas!' });
                         }
                         return;
                     }
-    
-                    // Suscribirse a notificaciones push
+
                     const subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo'
                     });
-    
+
                     console.log('Suscripción exitosa:', subscription);
-    
-                    // Enviar la suscripción al servidor
+
+                    const subscriptionJSON = subscription.toJSON();
+                    if (!subscriptionJSON || !subscriptionJSON.endpoint) {
+                        throw new Error("Suscripción inválida: falta el endpoint.");
+                    }
+
                     const response = await fetch('/save-subscription', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(subscription)
+                        body: JSON.stringify(subscriptionJSON)
                     });
-    
+
                     if (!response.ok) {
                         throw new Error(`Error HTTP: ${response.status}`);
                     }
-    
+
                     const result = await response.json();
                     console.log('Respuesta del servidor:', result);
-    
+
                     if (result.message === 'Suscripción ya existe') {
-                        M.toast({html: 'Ya estás suscrito a las notificaciones'});
+                        M.toast({ html: 'Ya estás suscrito a las notificaciones' });
                     } else {
-                        M.toast({html: '¡Notificaciones activadas!'});
+                        M.toast({ html: '¡Notificaciones activadas!' });
                     }
+
                 } catch (error) {
                     console.error('Error al suscribirse:', error);
-                    M.toast({html: 'Error al activar notificaciones: ' + error.message});
+                    M.toast({ html: 'Error al activar notificaciones: ' + error.message });
                 }
             }
-    
-            // Verificar permisos al cargar la página
+
             checkNotificationPermission();
         });
-        </script>
-        
-    
+    </script>
+
     <script src="/js/fecha.js"></script>
     <script src="/js/instalar.js"></script>
 </body>
