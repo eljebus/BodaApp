@@ -1,0 +1,219 @@
+.albumTitle{
+
+    margin-top: 0;
+    padding-top:1em;
+    padding-bottom: 0.3em;
+}
+#modal-image{
+  width: 100%;
+}
+#album{
+  position: relative;
+  max-width: 400px;
+  margin: auto;
+  overflow: hidden;
+ 
+}
+.modal {
+  padding: 0;
+  width: 90%;
+
+  max-height: 100vh;
+}
+
+.modal .modal-content {
+  padding: 0px;
+  padding: 0;
+  margin: 0;
+  border: none; /* Por si acaso */
+  overflow: hidden !important;
+}
+
+.modal, .modal-content, .modal-inner {
+  min-height: unset !important;
+  height: fit-content !important;
+}
+#ImagenContenido{
+  position: relative;
+}
+.lean-overlay {
+  background-color: rgba(0, 0, 0, 0.8) !important; /* Negro al 80% de opacidad */
+  opacity: 1 !important; /* Fuerza opacidad completa */
+}
+.modal-overlay {
+
+  opacity: 0.85 !important;
+}
+
+#closeImg{
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  z-index: 1;
+  background-color: gray;
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controles{
+  position: absolute;
+  bottom: 0.5em;
+  right: 0.5em;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+ #descargar,#compartir{
+ 
+  z-index: 1;
+  background-color: #73A3D3;
+  color: white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal {
+  padding: 0 !important;
+  border: none !important;
+  max-height: 100vh !important;
+}
+.modal-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 0 !important; /* Elimina espacio por texto */
+}
+.modal-content img {
+  width: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+#menu{
+  background-color: #73A3D3;
+  font-size: 2em;
+  height: 60px;
+  width: 60px;
+}
+
+#camera-icon,#galery-icon {
+    cursor: pointer;
+    padding: 8px;
+    background-color: #73A3D3;
+    display: flex;
+    width: 50px;
+    height: 50px;
+  
+    justify-content: center;
+}
+
+.fixed-action-btn.direction-left ul li, .fixed-action-btn.direction-right ul li {
+  display: inline-block;
+  margin: 4px 15px 0 0;
+}
+
+.btn-floating.btn-large {
+  width: 60px;
+  height: 60px;
+  padding: 0;
+}
+#camera-icon img,#galery-icon img {
+  width: 100%;
+  height: 27px;
+  margin-top: 3px;
+
+}
+#fotoContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-gap: 16px;
+    margin: 0 auto;
+    padding: 1em;
+}
+
+.pinterest-masonry {
+    column-count: 4;
+    column-gap: 16px;
+    margin: 0 auto;
+    max-width: 100%;
+    padding: 0.7em;
+  }
+  
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .masonry-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .masonry-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  @media (max-width: 900px) {
+    .pinterest-masonry { column-count: 3; }
+  }
+  
+  @media (max-width: 600px) {
+    .pinterest-masonry { column-count: 2; }
+   
+  }
+  @media (orientation: landscape) {
+   .modal{
+    height: 100%;
+   }
+  }
+
+    /* O bien */
+    .landscape-message {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .landscape-message img{
+      width: 100px;
+      margin: auto;
+    }
+    
+    /* Mostrar en modo paisaje */
+    @media screen and (orientation: landscape) {
+      .landscape-message {
+        display: flex;
+      }
+      
+      /* Ocultar el contenido principal de la app */
+      main {
+        display: none;
+      }
+    }
+    
+
+
+
+    

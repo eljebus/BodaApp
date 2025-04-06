@@ -1,0 +1,66 @@
+<div class="container">
+    <h4>Enviar Notificación Push</h4>
+    <div class="row">
+        <form id="notificationForm" class="col s12">
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="title" type="text" class="validate" required>
+                    <label for="title">Título de la notificación</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <textarea id="body" class="materialize-textarea" required></textarea>
+                    <label for="body">Mensaje de la notificación</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    <button class="btn waves-effect waves-light" type="submit">
+                        Enviar Notificación
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('notificationForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('title').value;
+        const body = document.getElementById('body').value;
+        
+        try {
+            const response = await fetch('/send-notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    body: body,
+                    image: '/img/icon-192x192.png'
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                M.toast({html: 'Notificación enviada exitosamente'});
+                form.reset();
+            } else {
+                M.toast({html: 'Error al enviar notificación: ' + result.error});
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            M.toast({html: 'Error al enviar notificación'});
+        }
+    });
+});
+</script> 

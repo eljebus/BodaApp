@@ -1,0 +1,77 @@
+{
+    "name": "Boda Fatima y Jesús",
+    "short_name": "Boda FyJ",
+    "description": "Aplicación para la boda de Fatima y Jesús",
+    "icons": [
+      {
+        "src": "/img/icon-192x192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/img/icon-512x512.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any maskable"
+      }
+    ],
+    "start_url": "/",
+    "background_color": "#FCFEFE",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#3967AF",
+    "orientation": "portrait",
+    "prefer_related_applications": false,
+    "categories": ["lifestyle", "social"],
+    "screenshots": [
+        {
+            "src": "/img/icon-192x192.png",
+            "sizes": "1280x720",
+            "type": "image/png"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Inicio",
+            "url": "/",
+            "description": "Página principal",
+            "icons": [{ "src": "/img/icon-192x192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Plan de la Boda",
+            "url": "/plan", 
+            "description": "Ver el cronograma del evento",
+            "icons": [{ "src": "/img/icon-192x192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Mensajes",
+            "url": "/textos",
+            "description": "Deja tus buenos deseos",
+            "icons": [{ "src": "/img/icon-192x192.png", "sizes": "192x192" }]
+        },
+        {
+          "name": "Album",
+          "url": "/album",
+          "description": "Galería de fotos",
+          "icons": [{ "src": "/img/icon-192x192.png", "sizes": "192x192" }]
+        }
+    ],
+    "lang": "es",
+    "dir": "ltr",
+    "related_applications": [],
+    "iarc_rating_id": "",
+    "share_target": {
+        "action": "/compartir",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "files": [
+                {
+                    "name": "photos",
+                    "accept": ["image/*"]
+                }
+            ]
+        }
+    }
+}

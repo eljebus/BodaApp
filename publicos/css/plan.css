@@ -1,0 +1,86 @@
+@font-face {
+    font-family: 'CREMISS.signature';
+    src: url('fonts/CREMISS.signature.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'ClaraSignature';
+    src: url('fonts/ClaraSignature.otf') format('opentype');
+}
+:root {
+    --main-color: #373435;
+}
+
+#plan {
+    position: relative;
+}
+#home-icon {
+    position: fixed;
+    top: 3em;
+    left: 1em;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    padding: 5px;
+    color: white;
+    border-radius: 50%;
+    background-color: #73A3D3;
+}
+#el,#dia {
+    font-size: 1.5em;
+    color: var(--main-color);
+    transform: scaleY(1.5); /* Stretches the text vertically */
+    margin-bottom: 1em;
+}
+
+#gran{
+
+    font-family: 'ClaraSignature';
+    color: #3E4095;
+    font-size: 1.2em;
+    margin-top: -0.5em;
+    margin-bottom: 0.8em;
+    margin-left: -0.5em;
+}
+
+
+#fecha{
+    font-size: 1em;
+    color: var(--main-color);
+}
+
+
+.evento {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3em;
+}
+.evento img{
+    width: 70px;
+}
+#mapa{
+    width: 40px;
+}
+.evento p{
+
+    font-size: 2em !important;
+    margin: 0;
+    color: var(--main-color);
+    text-align: center;
+
+}
+
+.evento .title{
+    font-size: 2em !important;
+}
+#fases{
+    width: 70%;
+    margin-top: 5em;
+    margin-bottom: 3em;
+}
+
+#como-llegar{
+    background-color: #73A3D3;
+    margin-top: 0.5em;
+}

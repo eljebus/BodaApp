@@ -1,0 +1,75 @@
+<section id="textos">
+
+
+    <h1 class="z-depth-1 albumTitle">
+        Fátima & Jesús
+    </h1>
+
+    
+    
+    <a href="/" id="home-icon">
+        <i class="material-icons" style="font-size: 20px;">home</i>
+    </a>
+
+
+
+
+    <a class="btn-floating" id="pencil-icon" style="background-color: #3E4095;"><img src="img/pencil.png" alt=""></a>
+
+
+    <section id="textContainer">
+
+        <aside id="formulario">
+
+            <div class="input-field">
+                <input value="" id="nombre" placeholder="¿Como te llamas?" type="text" class="validate">
+                
+              
+            </div>
+    
+            <div class="input-field ">
+                <textarea id="deseo" placeholder="¿Que nos deseas?" class="materialize-textarea"></textarea>
+
+              </div>
+
+              <a class="waves-effect waves-light btn" ID="compartirTexto">
+                  <i class="material-icons left">favorite</i>COMPARTIR
+              </a>
+
+        </aside>
+
+
+        <% if (deseos && deseos.length > 0) { %>   
+            <% deseos.slice().reverse().forEach(deseo => { %>
+            <article class="texto z-depth-1">
+            <strong>
+            <%= deseo.nombre %>:
+            </strong>
+            <p>
+            <%= deseo.deseo %>
+            </p>
+            </article>
+            <% }); %>
+        <% } 
+        else{ %>
+            
+                <div class="no-deseos-container">
+                    <p class="no-deseos-title" style="font-size: 34px;"></p>
+                        No hay deseos por el momento
+                    </p>
+                    <i class="material-icons no-deseos-icon" style="font-size: 36px; color: gray;">sentiment_dissatisfied</i>
+                    <p class="no-deseos-message" style="font-size: 18px;"></p>
+                        ¡Sé el primero en comentar y compartir tus buenos deseos!
+                    </p>
+                </div>
+
+        
+       <% } %>
+
+
+    </section>
+
+
+<script src="js/textos.js"></script>
+
+</section>

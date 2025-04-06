@@ -1,0 +1,75 @@
+<section id="album">
+    
+    
+
+
+    <h1 class="z-depth-1 albumTitle">
+        Fatima & Jesús
+    </h1>
+
+
+    <div class="pinterest-masonry">
+
+      <% if (fotos && fotos.length > 0) { %>
+        <% fotos.forEach(foto => { %>
+          <div class="masonry-item modal-trigger" data-target="photo-modal">
+            <img src="<%= foto %>" alt="Imagen del álbum">
+           
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="no-fotos">No hay fotos disponibles.</p>
+      <% } %>
+
+        
+        <!-- más imágenes -->
+      </div>
+
+
+    
+    <a href="/" id="home-icon">
+        <i class="material-icons" style="font-size: 20px;">home</i>
+    </a>
+
+
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large red waves-effect waves-light btn z-depth-2">
+        <i class="large material-icons" id="menu">add_a_photo</i>
+      </a>
+      <ul>
+        <li ><a class="btn-floating" id="camera-icon" style="background-color: #3E4095;"><img src="img/foto.png" alt=""></a></li>
+        <li><a class="btn-floating " style="background-color: #73A3D3;" id="galery-icon"><img src="img/galeria.png" alt=""></a></li>
+      </ul>
+    </div>
+    
+
+    <div id="photo-modal" class="modal">
+      <div class="modal-content" id="ImagenContenido">
+        
+        <img id="modal-image" src="" alt="Imagen ampliada">
+
+        
+          <i class="material-icons modal-close z-depth-1" id="closeImg" style="font-size: 24px;">close</i>
+
+
+
+         <div class="controles">
+                <i class="material-icons z-depth-2" id="compartir" style="font-size: 24px;">share</i>
+              <i class="material-icons z-depth-2" id="descargar" style="font-size: 24px; ">file_download</i>
+         </div>
+       
+       
+      </div>
+    </div>
+
+
+
+
+
+
+    <script  src="js/script.js"></script>
+
+
+     
+</section>

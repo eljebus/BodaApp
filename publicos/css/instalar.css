@@ -1,0 +1,8 @@
+#installPWA {
+    
+  }
+  
+  .fade-out {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
