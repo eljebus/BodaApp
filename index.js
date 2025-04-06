@@ -45,7 +45,7 @@ app.use('/', userRoutes);
 
 // Registrar tareas programadas
 const programarNotificaciones = () => {
-  const filePath = path.join(__dirname, '@notificaciones_programadas.json');
+  const filePath = path.join(__dirname, 'publicos/notificaciones_programadas.json');
   if (fs.existsSync(filePath)) {
     const tareas = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     tareas.forEach(tarea => {
