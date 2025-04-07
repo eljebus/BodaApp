@@ -1,23 +1,47 @@
 [
-    {
-        "id": "boda_principal",
-        "title": "¡Es hora de la boda!",
-        "body": "La ceremonia comenzará en 30 minutos. ¡Nos vemos en la iglesia!",
-        "image": "/img/icon-192x192.png",
-        "scheduledDateTime": "2024-06-07T16:30:00"
-    },
-    {
-        "id": "recordatorio_mañana",
-        "title": "¡Mañana es el gran día!",
-        "body": "No olvides que mañana es nuestra boda. ¡Te esperamos!",
-        "image": "/img/icon-192x192.png",
-        "scheduledDateTime": "2025-06-06T09:00:00"
-    },
-    {
-        "id": "recordatorio_semana",
-        "title": "¡Falta una semana!",
-        "body": "Falta poco para nuestra boda. ¡Estamos muy emocionados!",
-        "image": "/img/icon-192x192.png",
-        "scheduledDateTime":  "2025-04-05T20:00:00"
+  {
+    "id": "boda_principal",
+    "title": "¡Es hora de la boda!",
+    "body": "La ceremonia comenzará en 30 minutos. ¡Nos vemos en la iglesia!",
+    "image": "/img/icon-192x192.png",
+    "scheduledDateTime": "2024-06-07T16:30:00",
+    "suscripcion": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/xyz123...",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "abc123...",
+        "auth": "def456..."
+      }
     }
-] 
+  },
+  {
+    "id": "recordatorio_mañana",
+    "title": "¡Mañana es el gran día!",
+    "body": "No olvides que mañana es nuestra boda. ¡Te esperamos!",
+    "image": "/img/icon-192x192.png",
+    "scheduledDateTime": "2025-06-06T09:00:00",
+    "suscripcion": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/abc456...",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "ghi789...",
+        "auth": "jkl012..."
+      }
+    }
+  },
+  {
+    "id": "recordatorio_semana",
+    "title": "¡Falta una semana!",
+    "body": "Falta poco para nuestra boda. ¡Estamos muy emocionados!",
+    "image": "/img/icon-192x192.png",
+    "scheduledDateTime": "2025-04-05T20:00:00",
+    "suscripcion": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/xyz789...",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "mno345...",
+        "auth": "pqr678..."
+      }
+    }
+  }
+]
