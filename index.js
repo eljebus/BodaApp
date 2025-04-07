@@ -81,8 +81,8 @@ const programarNotificaciones = () => {
 programarNotificaciones();
 
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+app.listen(port, () => {
+  console.log(`Servidor corriendo en el puerto ${port}`);
 });
 /*
 // Cargar certificados SSL desde la carpeta certificados
