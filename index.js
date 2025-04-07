@@ -1,3 +1,4 @@
+const https = require('https');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -7,16 +8,16 @@ const fs = require('fs');
 const userRoutes = require('./rutas');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000; // Puerto fijo para entorno local
 
-// Configuración VAPID
+// Configuración VAPID para entorno local
 const vapidKeys = {
-  publicKey: process.env.VAPID_PUBLIC_KEY || 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo',
-  privateKey: process.env.VAPID_PRIVATE_KEY || 'SbrIGm6fNYR3jW_-khzghnkOc-pGEWPZvzdchPIgp_U'
+  publicKey: 'BC-d2euHb147bF7av1kpDwH84fswmN0_8zjODcQptU63P5q-FNVWa9Tuc_2GBofCc1SgDdbS8c_aHdDXiWfCYyo',
+  privateKey: 'SbrIGm6fNYR3jW_-khzghnkOc-pGEWPZvzdchPIgp_U'
 };
 
 webPush.setVapidDetails(
-  process.env.VAPID_EMAIL || 'mailto:tu-email@example.com',
+  'mailto:local@example.com', // Correo genérico para pruebas locales
   vapidKeys.publicKey,
   vapidKeys.privateKey
 );
@@ -50,11 +51,25 @@ const programarNotificaciones = () => {
     const tareas = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     tareas.forEach(tarea => {
       const { fecha, mensaje, suscripcion } = tarea;
+
+      // Verificación de suscripción
+      if (!suscripcion || !suscripcion.endpoint) {
+        console.error('Suscripción inválida, no tiene endpoint.');
+        return; // Si no tiene endpoint, no intentamos enviar la notificación.
+      }
+
       schedule.scheduleJob(new Date(fecha), () => {
         const payload = JSON.stringify({ title: 'Notificación', body: mensaje });
-        webPush.sendNotification(suscripcion, payload).catch(err => {
-          console.error('Error al enviar notificación:', err);
-        });
+
+        // Enviar notificación
+        webPush.sendNotification(suscripcion, payload)
+          .then(response => {
+            console.log('Notificación enviada correctamente:', response);
+          })
+          .catch(err => {
+            console.error('Error al enviar la notificación:', err);
+            console.error('Suscripción:', suscripcion);
+          });
       });
     });
     console.log('Tareas programadas registradas correctamente.');
@@ -65,7 +80,19 @@ const programarNotificaciones = () => {
 
 programarNotificaciones();
 
-// ¡Aquí es donde debes escuchar!
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:${port}`);
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+/*
+// Cargar certificados SSL desde la carpeta certificados
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'certificados', 'cert.crt')),
+  ca: fs.readFileSync(path.join(__dirname, 'certificados', 'ca.crt'))
+};
+
+// ¡Aquí es donde debes escuchar!
+https.createServer(sslOptions, app).listen(port, () => {
+  console.log(`Servidor corriendo en https://localhost:${port}`);
+});*/
