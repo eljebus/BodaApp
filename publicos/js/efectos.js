@@ -10,7 +10,7 @@
             console.error("Los elementos #luna o #principal no existen en el DOM.");
         }
 
-        const targetDate = new Date('June 7, 2025 5:00:00').getTime();
+        const targetDate = new Date('April 15, 2025 5:00:00').getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
